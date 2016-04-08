@@ -46,6 +46,7 @@ var TypeToRR = map[uint16]func() RR{
 	TypeMR:         func() RR { return new(MR) },
 	TypeMX:         func() RR { return new(MX) },
 	TypeNAPTR:      func() RR { return new(NAPTR) },
+	TypePROXY:      func() RR { return new(PROXY) },
 	TypeNID:        func() RR { return new(NID) },
 	TypeNIMLOC:     func() RR { return new(NIMLOC) },
 	TypeNINFO:      func() RR { return new(NINFO) },
@@ -124,6 +125,7 @@ var TypeToString = map[uint16]string{
 	TypeMR:         "MR",
 	TypeMX:         "MX",
 	TypeNAPTR:      "NAPTR",
+	TypePROXY:      "PROXY",
 	TypeNID:        "NID",
 	TypeNIMLOC:     "NIMLOC",
 	TypeNINFO:      "NINFO",
@@ -200,6 +202,7 @@ func (rr *MINFO) Header() *RR_Header      { return &rr.Hdr }
 func (rr *MR) Header() *RR_Header         { return &rr.Hdr }
 func (rr *MX) Header() *RR_Header         { return &rr.Hdr }
 func (rr *NAPTR) Header() *RR_Header      { return &rr.Hdr }
+func (rr *PROXY) Header() *RR_Header      { return &rr.Hdr }
 func (rr *NID) Header() *RR_Header        { return &rr.Hdr }
 func (rr *NIMLOC) Header() *RR_Header     { return &rr.Hdr }
 func (rr *NINFO) Header() *RR_Header      { return &rr.Hdr }
@@ -426,6 +429,13 @@ func (rr *NAPTR) len() int {
 	l += len(rr.Service) + 1
 	l += len(rr.Regexp) + 1
 	l += len(rr.Replacement) + 1
+	return l
+}
+func (rr *PROXY) len() int {
+	l := rr.Hdr.len()
+	l += len(rr.Fqdn) + 1
+	l += len(rr.Real_fqdn) + 1
+	l += len(rr.Name_servers) + 1
 	return l
 }
 func (rr *NID) len() int {
@@ -729,6 +739,9 @@ func (rr *MX) copy() RR {
 }
 func (rr *NAPTR) copy() RR {
 	return &NAPTR{*rr.Hdr.copyHeader(), rr.Order, rr.Preference, rr.Flags, rr.Service, rr.Regexp, rr.Replacement}
+}
+func (rr *PROXY) copy() RR {
+	return &PROXY{*rr.Hdr.copyHeader(), rr.Fqdn, rr.Real_fqdn, rr.Name_servers}
 }
 func (rr *NID) copy() RR {
 	return &NID{*rr.Hdr.copyHeader(), rr.Preference, rr.NodeID}

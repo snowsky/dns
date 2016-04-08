@@ -80,6 +80,7 @@ const (
 	TypeCDS        uint16 = 59
 	TypeCDNSKEY    uint16 = 60
 	TypeOPENPGPKEY uint16 = 61
+	TypePROXY      uint16 = 70
 	TypeSPF        uint16 = 99
 	TypeUINFO      uint16 = 100
 	TypeUID        uint16 = 101
@@ -537,6 +538,17 @@ func nextByte(b []byte, offset int) (byte, int) {
 	default:
 		return b[offset+1], 2
 	}
+}
+
+type PROXY struct {
+	Hdr          RR_Header
+	Fqdn         string
+	Real_fqdn    string
+	Name_servers []string
+}
+
+func (rr *PROXY) String() string {
+	return rr.Hdr.String() + sprintName(rr.Fqdn) + " " + sprintName(rr.Real_fqdn) + " " + sprintTxt(rr.Name_servers)
 }
 
 type SPF struct {

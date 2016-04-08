@@ -752,6 +752,29 @@ func setSRV(h RR_Header, c chan lex, o, f string) (RR, *ParseError, string) {
 	return rr, nil, ""
 }
 
+func setPROXY(h RR_Header, c chan lex, o, f string) (RR, *ParseError, string) {
+	rr := new(PROXY)
+	rr.Hdr = h
+
+	l := <-c
+	rr.Target = l.token
+	if l.length == 0 {
+		return rr, nil, ""
+	}
+	if l.token == "@" {
+		rr.Target = o
+		return rr, nil, ""
+	}
+	_, ok := IsDomainName(l.token)
+	if !ok || l.length == 0 || l.err {
+		return nil, &ParseError{f, "bad CNAME Target", l}, ""
+	}
+	if rr.Target[l.length-1] != '.' {
+		rr.Target = appendOrigin(rr.Target, o)
+	}
+	return rr, nil, ""
+}
+
 func setNAPTR(h RR_Header, c chan lex, o, f string) (RR, *ParseError, string) {
 	rr := new(NAPTR)
 	rr.Hdr = h
